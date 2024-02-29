@@ -1,13 +1,14 @@
 from mininet.topo import Topo
 from mininet.node import OVSBridge
+from .base import Base
 
-class OCS( Topo ):
+class OCS( Base ):
     #def __init__( self, nAggr=4, nToR=16, nSrv=15 ):
-    def __init__( self, nAggr=2, nToR=4, nSrv=5 ):
+    def __init__( self, nAggr=2, nToR=2, nSrv=3 ):
         self.aggrBlocks = []
         self.ToRs = []
         self.Servers = []
-        Topo.__init__(self)
+        Base.__init__(self)
 
         for index in range(nAggr):
             aggrName = f'A{index}'
@@ -27,8 +28,3 @@ class OCS( Topo ):
         for i in range(len(self.aggrBlocks)):
             for j in range(i+1, len(self.aggrBlocks)):
                 self.addLink(self.aggrBlocks[i], self.aggrBlocks[j])
-
-    def addStpSwitch( self, name ):
-        switchOpts = {'cls': OVSBridge,'stp': 1}
-        sw = self.addSwitch(name, **switchOpts)
-        return sw
