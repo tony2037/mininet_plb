@@ -1,7 +1,7 @@
 from mininet.clean import Cleanup
 from mininet.net import Mininet
 from mininet.cli import CLI
-
+from topologies.clos import CLOS
 from topologies.ocs import OCS as CustomTopo
 from utils.benchmark import TESTS
 
@@ -20,7 +20,7 @@ def setupNet(net):
 
 if __name__ == '__main__':
     Cleanup.cleanup()
-    net = Mininet( topo = CustomTopo() )
+    net = Mininet( topo = CLOS() )
     setupNet(net)
     net.start()
 
