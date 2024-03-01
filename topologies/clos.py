@@ -1,6 +1,6 @@
 from .base import Base
 
-class CLOS(Base):
+class CLOS( Base ):
     def build(self, numSpines=2, numAggrs=4, numTor=4, hostsPerTor=2):
         # Add Spine Switches
         spineSwitches = [self.addStpSwitch(f's{i}') for i in range(1, numSpines + 1)]
