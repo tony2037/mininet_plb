@@ -17,9 +17,13 @@ else:
     from topologies.clos import CLOS as CustomTopo
 
 def setupNode(node):
-    setupCmds = ['sysctl -w net.ipv4.tcp_congestion_control=bbr',\
-                    'sysctl -w net.ipv4.tcp_plb_enabled=1'\
-                    'sudo sysctl --system'\
+    # net.ipv4.tcp_plb_cong_thresh=32 -> 32/(2^8) = 0.125, threshold for CE fraction
+    setupCmds = ['sudo sysctl -w net.ipv4.tcp_ecn=1', \
+                 'sudo sysctl -w net.ipv4.tcp_congestion_control=dctcp',\
+                 'sudo sysctl -w net.ipv4.tcp_plb_enabled=1',\
+                 'sudo sysctl -w net.ipv4.tcp_plb_cong_thresh=32',\
+                 'sudo sysctl -w net.ipv4.tcp_plb_rehash_rounds=3',\
+                 'sudo sysctl --system'\
     ]
     for setupCmd in setupCmds:
         node.cmd(setupCmd)
