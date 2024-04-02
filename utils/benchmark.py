@@ -1,6 +1,14 @@
 import subprocess
 import re
 
+def setupServerNode(node):
+    node.cmd('iperf -s')
+
+def setupClientNodes(server, nodes, num_parallel=64, buffer_size='8K'):
+    cmd = 'iperf3 -c {server} -P {num_parallel} -l {buffer_size}'
+    for node in nodes:
+        node.cmd(cmd)
+
 def pingAllTest(net):
     net.pingAll()
 
@@ -59,6 +67,9 @@ def load_imbalance_test(net):
 
     # Get switches list(a: aggregation block, s: spine block, t: top of rack)
     switches = net.switches
+
+    # FIXME: send traffic here
+
     #print("a: aggregation block, s: spine block, t: top of rack")
     # Gather port statistics
     for switch in switches:
