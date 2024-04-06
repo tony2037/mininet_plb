@@ -1,10 +1,11 @@
 from mininet.topo import Topo
 from mininet.node import OVSBridge
+from mininet.link import TCLink
 from .base import Base
 
 class OCS( Base ):
     #def __init__( self, nAggr=4, nToR=16, nSrv=15 ):
-    def __init__( self, nAggr=2, nToR=2, nSrv=3 ):
+    def __init__( self, nAggr=8, nToR=1, nSrv=1 ):
         self.aggrBlocks = []
         self.ToRs = []
         self.Servers = []
@@ -25,6 +26,6 @@ class OCS( Base ):
                     self.Servers.append(server)
                     self.addLink(server, ToR)
 
-        for i in range(len(self.aggrBlocks)):
-            for j in range(i+1, len(self.aggrBlocks)):
-                self.addLink(self.aggrBlocks[i], self.aggrBlocks[j])
+        self.addLink(self.aggrBlocks[0], self.aggrBlocks[7], cls=TCLink, bw=5)
+        for i in range(0, 7):
+            self.addLink(self.aggrBlocks[i], self.aggrBlocks[i+1], cls=TCLink, bw=2)

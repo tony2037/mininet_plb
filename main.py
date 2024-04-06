@@ -1,6 +1,8 @@
 from mininet.clean import Cleanup
 from mininet.net import Mininet
 from mininet.cli import CLI
+from mininet.link import TCLink
+import time
 from utils.benchmark import TESTS
 import argparse
 
@@ -33,6 +35,14 @@ def setupNet(net):
     for node in nodes:
         setupNode(node)
 
+def iperf():
+    server = net.get('A1_T0_h0')
+    client = net.get('A0_T0_h0')
+    server.cmd('iperf -s &')
+    time.sleep(1)
+    iperf_results = client.cmd(f'iperf -c A1_T0_h0 -t 10 -b 10M -i 1')
+    print(iperf_results)
+
 def prehookTest(net):
     if args.cli:
         CLI(net)
@@ -46,9 +56,11 @@ def posthookTest(net):
 
 if __name__ == '__main__':
     Cleanup.cleanup()
-    net = Mininet( topo = CustomTopo() )
+    net = Mininet( topo = CustomTopo(), link = TCLink )
     setupNet(net)
     net.start()
+
+    iperf()
 
     prehookTest(net)
     performTest(net)
