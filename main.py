@@ -5,7 +5,7 @@ from utils.benchmark import TESTS
 import argparse
 
 parser = argparse.ArgumentParser(description='Script for PLB lab')
-parser.add_argument('--topo', default='clos', choices=['ocs', 'clos'])
+parser.add_argument('--topo', default='clos', choices=['ocs', 'clos', 'test', 'star'])
 parser.add_argument('--cli', action='store_true')
 args = parser.parse_args()
 
@@ -13,18 +13,26 @@ if args.topo == 'clos':
     from topologies.clos import CLOS as CustomTopo
 elif args.topo == 'ocs':
     from topologies.ocs import OCS as CustomTopo
+elif args.topo == 'test':
+    from topologies.test import Test as CustomTopo
+elif args.topo == 'star':
+    from topologies.test import StarTopo as CustomTopo
 else:
     from topologies.clos import CLOS as CustomTopo
 
 def setupNode(node):
     # net.ipv4.tcp_plb_cong_thresh=32 -> 32/(2^8) = 0.125, threshold for CE fraction
     setupCmds = ['sudo sysctl -w net.ipv4.tcp_ecn=1', \
-                 'sudo sysctl -w net.ipv4.tcp_congestion_control=dctcp',\
+                 'sudo sysctl -w net.ipv4.tcp_congestion_control=cubic',\
                  'sudo sysctl -w net.ipv4.tcp_plb_enabled=1',\
                  'sudo sysctl -w net.ipv4.tcp_plb_cong_thresh=32',\
                  'sudo sysctl -w net.ipv4.tcp_plb_rehash_rounds=3',\
+                 'sudo sysctl -w net.core.default_qdisc=fq',\
                  'sudo sysctl --system'\
     ]
+    interfaces = node.intfNames()
+    for interface in interfaces:
+        node.cmd(f'tc qdisc change dev {interface} root red limit 100000 min 2000 max 10000 avpkt 100 burst 21 ecn')
     for setupCmd in setupCmds:
         node.cmd(setupCmd)
 
@@ -42,7 +50,8 @@ def performTest(net):
         test(net)
 
 def posthookTest(net):
-    pass
+    if args.cli:
+        CLI(net)
 
 if __name__ == '__main__':
     Cleanup.cleanup()
@@ -52,7 +61,7 @@ if __name__ == '__main__':
 
     prehookTest(net)
     performTest(net)
-    posthookTest
+    posthookTest(net)
 
     net.stop()
     Cleanup.cleanup()
